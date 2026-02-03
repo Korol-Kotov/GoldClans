@@ -2,3 +2,10 @@ name: GoldClans
 version: '1.0'
 main: me.korolkotov.goldclans.Main
 api-version: '1.21'
+author: KoroLKotov
+
+softdepend: [Vault]
+
+commands:
+  clan:
+    description: 'Основная команда плагина GoldClans.'

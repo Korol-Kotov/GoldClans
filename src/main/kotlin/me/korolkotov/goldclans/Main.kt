@@ -1,14 +1,28 @@
 package me.korolkotov.goldclans
 
+import me.korolkotov.goldclans.coroutine.PluginCoroutineScope
+import me.korolkotov.goldclans.load.LoadManager
+import me.korolkotov.goldclans.logger.Logger
 import org.bukkit.plugin.java.JavaPlugin
 
 class Main : JavaPlugin() {
+    companion object {
+        lateinit var instance: Main private set
+    }
+
+    val loadManager = LoadManager()
 
     override fun onEnable() {
-        // Plugin startup logic
+        instance = this
+        loadManager.initialize()
+        logger.info("Plugin $name enabled!")
+        Logger.instance.debug("Plugin has enabled.")
     }
 
     override fun onDisable() {
-        // Plugin shutdown logic
+        Logger.instance.debug("Disabling plugin.")
+        loadManager.terminate()
+        PluginCoroutineScope.shutdown()
+        logger.info("Plugin $name disabled!")
     }
 }

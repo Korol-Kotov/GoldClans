@@ -1,0 +1,7 @@
+plugin: # основные настройки плагина
+  language: ru # язык сообщений (папка messages)
+  debug: false
+
+economy:
+  symbols:
+    vault: '⛏'

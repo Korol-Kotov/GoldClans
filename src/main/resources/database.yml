@@ -1,0 +1,28 @@
+database:
+  type: "mysql" # Возможные значения: mysql, sqlite
+
+  # MySQL настройки (используются только при type: mysql)
+  mysql:
+    host: "localhost"
+    port: "3306"
+    database: "minecraft"
+    user: "root"
+    password: "123"
+
+    connection-properties:
+      useSSL: false
+      autoReconnect: true
+      characterEncoding: "utf8"
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+
+    pool:
+      pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+
+  sqlite:
+    file: "database.db"
