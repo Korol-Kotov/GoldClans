@@ -1,0 +1,4 @@
+name: GoldClans
+version: '1.0'
+main: me.korolkotov.goldclans.Main
+api-version: '1.21'
