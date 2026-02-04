@@ -3,12 +3,25 @@ package me.korolkotov.goldclans.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import me.korolkotov.goldclans.config.ConfigManager
+import me.korolkotov.goldclans.database.dao.ClanDao
+import me.korolkotov.goldclans.database.dao.ClanMemberDao
+import me.korolkotov.goldclans.database.dao.ClanStorageDao
+import me.korolkotov.goldclans.database.dao.jdbc.JdbcClanDao
+import me.korolkotov.goldclans.database.dao.jdbc.JdbcClanMemberDao
+import me.korolkotov.goldclans.database.dao.jdbc.JdbcClanStorageDao
+import me.korolkotov.goldclans.database.repository.ClanRepository
 import me.korolkotov.goldclans.load.LoadManagerInterface
 import me.korolkotov.goldclans.logger.Logger
 import java.io.File
 
 class DatabaseManager : LoadManagerInterface<DatabaseManager> {
     lateinit var dataSource: HikariDataSource
+
+    lateinit var clanDao: ClanDao
+    lateinit var clanMemberDao: ClanMemberDao
+    lateinit var clanStorageDao: ClanStorageDao
+
+    lateinit var clanRepository: ClanRepository
 
     override fun getInstance() = this
 
@@ -61,6 +74,12 @@ class DatabaseManager : LoadManagerInterface<DatabaseManager> {
 
         MigrationService(dataSource).migrate()
         Logger.instance.debug("Database has been migrated.")
+
+        clanDao = JdbcClanDao(dataSource)
+        clanMemberDao = JdbcClanMemberDao(dataSource)
+        clanStorageDao = JdbcClanStorageDao(dataSource)
+
+        clanRepository = ClanRepository(clanDao, clanMemberDao, clanStorageDao)
     }
 
     override fun terminate() {

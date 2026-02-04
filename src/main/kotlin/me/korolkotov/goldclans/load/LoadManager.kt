@@ -1,5 +1,6 @@
 package me.korolkotov.goldclans.load
 
+import me.korolkotov.goldclans.clan.ClanManager
 import me.korolkotov.goldclans.command.CommandManager
 import me.korolkotov.goldclans.config.ConfigManager
 import me.korolkotov.goldclans.database.DatabaseManager
@@ -21,6 +22,7 @@ class LoadManager {
         loadManagerInterfaces.add(LoggerManager())
         loadManagerInterfaces.add(DatabaseManager())
         loadManagerInterfaces.add(EconomyManager())
+        loadManagerInterfaces.add(ClanManager())
         loadManagerInterfaces.add(MenuManager())
         loadManagerInterfaces.add(CommandManager())
     }
