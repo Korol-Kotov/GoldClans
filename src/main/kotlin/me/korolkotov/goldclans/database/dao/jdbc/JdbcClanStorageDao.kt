@@ -18,7 +18,7 @@ class JdbcClanStorageDao(
                     item_data = excluded.item_data
             """
             con.prepareStatement(sql).use { ps ->
-                ps.setInt(1, slot.clanId)
+                ps.setString(1, slot.clanId)
                 ps.setInt(2, slot.slot)
                 ps.setString(3, ItemSerializer.serialize(slot.item))
                 ps.executeUpdate()
@@ -68,7 +68,7 @@ class JdbcClanStorageDao(
     }
 
     private fun ResultSet.toSlot() = ClanSlot(
-        clanId = getInt("clan_id"),
+        clanId = getString("clan_id"),
         slot = getInt("slot"),
         item = ItemSerializer.deserialize(getString("item_data") ?: "")
     )

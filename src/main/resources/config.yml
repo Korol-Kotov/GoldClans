@@ -5,3 +5,16 @@ plugin: # основные настройки плагина
 economy:
   symbols:
     vault: '⛏'
+
+clan:
+  create-cost: 10000
+  name-length: 3..3
+  levels:
+    cost: 10000..50000
+    resources:
+      - 'COBBLESTONE 64 0.5'
+      - 'STONE 256 0.5'
+  storage:
+    start-slots: 9
+    cost: 25000..50000
+    max-slots: 90

@@ -27,7 +27,7 @@ class JdbcClanMemberDao(
                 var i = 1
                 ps.setString(i++, member.uniqueId.toString())
                 ps.setString(i++, member.name)
-                ps.setInt(i++, member.clanId ?: -1)
+                ps.setString(i++, member.clanId)
                 ps.setInt(i, member.role?.id ?: -1)
                 ps.setInstant(++i, member.joinedAt)
                 ps.executeUpdate()
@@ -92,7 +92,7 @@ class JdbcClanMemberDao(
     private fun ResultSet.toMember() = ClanMember(
         uniqueId = UUID.fromString(getString("player_uuid")),
         name = getString("player_name"),
-        clanId = getInt("clan_id").let { if (it == -1) null else it },
+        clanId = getString("clan_id"),
         role = getInt("role").let { if (it == -1) null else ClanRole.entries.first { r -> r.id == it } },
         joinedAt = getInstant("joined_at")
     )

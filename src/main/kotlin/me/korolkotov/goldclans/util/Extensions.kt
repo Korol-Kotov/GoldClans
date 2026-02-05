@@ -15,6 +15,13 @@ fun ResultSet.getInstant(column: String): Instant = getTimestamp(column).toInsta
 
 fun PreparedStatement.setInstant(index: Int, instant: Instant) = setTimestamp(index, Timestamp.from(instant))
 
+fun String.toRange(): IntRange {
+    val args = this.split("..")
+    val min = args[0].toInt()
+    val max = args[1].toInt()
+    return min..max
+}
+
 fun Double.format(): String {
     val bd = BigDecimal(this.toString())
         .setScale(2, RoundingMode.HALF_UP)

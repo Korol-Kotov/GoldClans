@@ -13,4 +13,17 @@ data class Clan(
     var storageSlots: Int,
     var nextLevelInfo: ClanLevelInfo,
     val createdAt: Instant
-)
+) {
+    private val members = mutableListOf<ClanMember>()
+
+    fun add(member: ClanMember) {
+        if (members.any { it.uniqueId == member.uniqueId }) return
+        members.add(member)
+    }
+
+    fun remove(member: ClanMember) {
+        members.remove(member)
+    }
+
+    fun members() = members.toList()
+}

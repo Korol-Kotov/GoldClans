@@ -1,6 +1,7 @@
 package me.korolkotov.goldclans.util
 
 import me.korolkotov.goldclans.config.ConfigManager
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
@@ -30,6 +31,12 @@ object MessageService {
 
     fun format(list: List<String>, replacements: Map<String, String> = emptyMap()): List<String> {
         return list.map { format(it, replacements) }
+    }
+
+    fun raw(text: String): String {
+        val formatted = format(text)
+        val component = LegacyComponentSerializer.legacySection().deserialize(formatted)
+        return component.content()
     }
 
     fun sendMessage(sender: CommandSender, message: String, replacements: Map<String, String> = emptyMap()) {

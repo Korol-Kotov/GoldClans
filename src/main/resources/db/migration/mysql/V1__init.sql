@@ -32,13 +32,13 @@ CREATE TABLE clan_members
 (
     player_uuid VARCHAR(36) PRIMARY KEY,
     player_name VARCHAR(16) NOT NULL,
-    clan_id     INT NULL,
+    clan_id     TEXT NULL,
     role        TINYINT NULL COMMENT '0 - member, 1 - moderator, 2 - leader',
     joined_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_clan_members_clan
         FOREIGN KEY (clan_id)
-            REFERENCES clans (id)
+            REFERENCES clans (name)
             ON DELETE SET NULL,
 
     INDEX       idx_clan_members_clan (clan_id),
@@ -50,13 +50,13 @@ CREATE TABLE clan_members
 -- -------------------------------
 CREATE TABLE clan_storage
 (
-    clan_id   INT  NOT NULL,
+    clan_id   TEXT NOT NULL,
     slot      INT  NOT NULL,
     item_data TEXT NOT NULL,
 
     CONSTRAINT fk_clan_storage_clan
         FOREIGN KEY (clan_id)
-            REFERENCES clans (id)
+            REFERENCES clans (name)
             ON DELETE CASCADE,
 
     PRIMARY KEY (clan_id, slot),

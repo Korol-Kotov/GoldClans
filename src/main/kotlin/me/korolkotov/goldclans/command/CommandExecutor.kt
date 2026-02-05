@@ -69,7 +69,7 @@ abstract class CommandExecutor : TabExecutor {
 
         runCatching {
             if (command.permissionNode.isNotEmpty() &&
-                !sender.hasPermission("blackauction.${command.permissionNode}")
+                !sender.hasPermission("goldclans.${command.permissionNode}")
             ) return CommandResult.NO_PERMISSIONS
 
             val function = wrapper.function
@@ -133,7 +133,7 @@ abstract class CommandExecutor : TabExecutor {
     fun sendHelpMessage(sender: CommandSender) {
         val availableCommands = mutableListOf<CommandWrapper>()
         commandMethods.values.forEach { wrappers ->
-            wrappers.filter { sender.hasPermission("blackauction.${it.getCommand().permissionNode}") }
+            wrappers.filter { sender.hasPermission("goldclans.${it.getCommand().permissionNode}") }
                 .forEach(availableCommands::add)
         }
 
@@ -245,7 +245,7 @@ abstract class CommandExecutor : TabExecutor {
                     val wrapper = commandMethods[cmd].orEmpty().firstOrNull() ?: continue
                     val command = wrapper.getCommand()
 
-                    if (command.permissionNode.isNotEmpty() && !sender.hasPermission("blackauction.${command.permissionNode}"))
+                    if (command.permissionNode.isNotEmpty() && !sender.hasPermission("goldclans.${command.permissionNode}"))
                         continue
 
                     completions.add(cmd)
@@ -262,7 +262,7 @@ abstract class CommandExecutor : TabExecutor {
                 val wrappers = commandMethods[args[0]]
                 for (wrapper in wrappers.orEmpty()) {
                     val command = wrapper.getCommand()
-                    if (command.permissionNode.isNotEmpty() && !sender.hasPermission("blackauction.${command.permissionNode}"))
+                    if (command.permissionNode.isNotEmpty() && !sender.hasPermission("goldclans.${command.permissionNode}"))
                         continue
 
                     if (args.size == 2 && command.subCommands.isNotEmpty())
@@ -288,8 +288,8 @@ abstract class CommandExecutor : TabExecutor {
                 }
                 completions.removeIfNotStartsWith(args[args.size - 1])
             }
-        }.onFailure {
-            TODO("logging")
+        }.onFailure { e ->
+            Logger.instance.error("Error has occurred when trying to tab complete (sender: ${sender.name}, cmd: ${args.getOrNull(0) ?: "use"})", e)
         }
 
         return completions
