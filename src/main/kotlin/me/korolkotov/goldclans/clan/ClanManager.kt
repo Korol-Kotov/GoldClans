@@ -81,6 +81,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
     }
 
     fun removeClan(clan: Clan) {
+        clan.isRemoved = true
         clan.members().forEach { member ->
             member.clanId = null
             member.role = null
