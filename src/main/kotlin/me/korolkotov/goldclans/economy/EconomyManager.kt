@@ -37,6 +37,8 @@ class EconomyManager : LoadManagerInterface<EconomyManager> {
         return true
     }
 
+    fun balance(player: OfflinePlayer): Double = vaultEconomy.balance(player)
+
     fun has(player: OfflinePlayer, amount: Double): Boolean = vaultEconomy.has(player, amount)
 
     fun withdraw(player: OfflinePlayer, amount: Double): Boolean = vaultEconomy.withdraw(player, amount)

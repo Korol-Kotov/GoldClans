@@ -1,9 +1,17 @@
 package me.korolkotov.goldclans.clan.model
 
+import kotlinx.coroutines.launch
+import me.korolkotov.goldclans.clan.ClanManager
+import me.korolkotov.goldclans.coroutine.PluginCoroutineScope
+import me.korolkotov.goldclans.load.LoadManager
+import me.korolkotov.goldclans.util.MessageService
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import java.time.Instant
-import java.util.UUID
+import java.util.*
+import kotlin.math.min
 
 data class Clan(
     var id: Int,
@@ -15,8 +23,28 @@ data class Clan(
     var nextLevelInfo: ClanLevelInfo,
     val createdAt: Instant
 ) {
+    val clanManager get() = LoadManager.getInstance(ClanManager::class.java)
+
+    private val slots = mutableListOf<ClanSlot>()
     private val members = mutableListOf<ClanMember>()
     var isRemoved = false
+
+    fun stylizedName(): String {
+        val normal = "abcdefghijklmnopqrstuvwxyz"
+        val fancy  = "ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ"
+
+        val map = normal.zip(fancy).toMap()
+
+        return buildString {
+            for (ch in name) {
+                val lower = ch.lowercaseChar()
+                append(
+                    if (lower in map) map[lower]!!
+                    else ch
+                )
+            }
+        }
+    }
 
     fun has(member: ClanMember) = members.any { it.uniqueId == member.uniqueId }
     fun has(player: Player) = members.any { it.uniqueId == player.uniqueId }
@@ -30,5 +58,69 @@ data class Clan(
         members.remove(member)
     }
 
+    fun bc(text: String) {
+        members.mapNotNull { it.player }.forEach { player ->
+            MessageService.sendMessage(player, text)
+        }
+    }
+
     fun members() = members.toList()
+
+    fun addItem(item: ItemStack) {
+        var need = item.amount
+        for (i in 0..<storageSlots) {
+            val slot = getSlot(i) ?: continue
+            if (slot.item.amount >= slot.item.maxStackSize) continue
+            if (slot.item.isSimilar(item)) {
+                val add = min(slot.item.maxStackSize - slot.item.amount, need)
+                slot.item.amount += add
+                need -= add
+                PluginCoroutineScope.scope.launch { clanManager.repository.clanStorageDao.set(slot) }
+            }
+            if (need <= 0) return
+        }
+        while (firstEmpty() != -1) {
+            val slot = firstEmpty()
+            val clanSlot = getSlot(slot) ?: ClanSlot(name, slot, ItemStack(Material.AIR))
+            if (!slots.contains(clanSlot)) slots.add(clanSlot)
+            val slotItem = item.clone()
+            val add = min(slotItem.maxStackSize, need)
+            slotItem.amount = add
+            clanSlot.item = slotItem
+            need -= add
+            PluginCoroutineScope.scope.launch { clanManager.repository.clanStorageDao.set(clanSlot) }
+            if (need <= 0) return
+        }
+    }
+
+    fun addSlot(slot: ClanSlot) {
+        if (slots.any { it.slot == slot.slot }) return
+        slots.add(slot)
+    }
+
+    fun getSlot(slot: Int) = slots.firstOrNull { it.slot == slot }
+
+    fun removeSlot(slot: Int) {
+        slots.removeAll { it.slot == slot }
+    }
+
+    fun canAdd(item: ItemStack): Boolean {
+        if (firstEmpty() != -1) return true
+        var need = item.amount
+        for (i in 0..<storageSlots) {
+            val slot = getSlot(i) ?: continue
+            if (slot.item.amount >= slot.item.maxStackSize) continue
+            if (slot.item.isSimilar(item)) need -= (slot.item.maxStackSize - slot.item.amount)
+            if (need <= 0) return true
+        }
+        return false
+    }
+
+    private fun firstEmpty(): Int {
+        for (i in 0..<storageSlots) {
+            val slot = getSlot(i)
+            if (slot == null || slot.item.type.isEmpty) return i
+        }
+        return -1
+    }
 }

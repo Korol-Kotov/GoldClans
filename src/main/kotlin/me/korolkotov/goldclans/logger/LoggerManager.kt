@@ -29,6 +29,10 @@ class LoggerManager : LoadManagerInterface<LoggerManager> {
         logger.debug("LoggerManager initialized.")
     }
 
+    override fun reload() {
+        logger.debug("LoggerManager reloaded.")
+    }
+
     override fun terminate() {
         logger.debug("LoggerManager terminated.")
         saveLogs()

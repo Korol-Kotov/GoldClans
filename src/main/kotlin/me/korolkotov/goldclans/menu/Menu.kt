@@ -79,12 +79,4 @@ abstract class Menu(id: String) : InventoryHolder {
 
         buttons.add(button)
     }
-
-    companion object {
-        fun getFromId(id: String, player: Player): Menu? {
-            return when (id.lowercase()) {
-                else -> null
-            }
-        }
-    }
 }

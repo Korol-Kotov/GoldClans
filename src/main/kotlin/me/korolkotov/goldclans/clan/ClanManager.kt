@@ -18,7 +18,10 @@ import me.korolkotov.goldclans.load.LoadManagerInterface
 import me.korolkotov.goldclans.logger.Logger
 import me.korolkotov.goldclans.util.MessageService
 import me.korolkotov.goldclans.util.TimeUtil
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import java.util.UUID
+import kotlin.random.Random
 
 class ClanManager : LoadManagerInterface<ClanManager> {
     companion object {
@@ -53,14 +56,22 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             withContext(BukkitDispatcher.MAIN) {
                 Logger.instance.debug("Clans members have been loaded to the cache")
             }
+
+            clanCache.clans.forEach { clan ->
+                repository.clanStorageDao.findAll(clan.id).forEach { slot ->
+                    clan.addSlot(slot)
+                }
+            }
         }
     }
 
     fun createClan(leader: Player, name: String): Clan {
+        val clanName = if (name == MessageService.raw(name)) "&${randomHexColor()}$name"
+        else name
         val member = getClanMember(leader)
         val clan = Clan(
             0,
-            MessageService.format(name),
+            MessageService.format(clanName),
             member.uniqueId,
             null,
             1,
@@ -90,6 +101,14 @@ class ClanManager : LoadManagerInterface<ClanManager> {
         PluginCoroutineScope.scope.launch { repository.clanDao.delete(clan.id) }
     }
 
+    fun getClanMember(uniqueId: UUID) = clanMemberCache.get(uniqueId)
+
+    fun getClanMember(name: String): ClanMember? {
+        val player = Bukkit.getPlayerExact(name)
+        return if (player != null) getClanMember(player)
+        else clanMemberCache.members.firstOrNull { it.name.equals(name, true) }
+    }
+
     fun getClanMember(player: Player): ClanMember {
         if (clanMemberCache.has(player.uniqueId)) return clanMemberCache.get(player.uniqueId)!!
         val member = ClanMember(
@@ -108,4 +127,9 @@ class ClanManager : LoadManagerInterface<ClanManager> {
     fun getClanByPlayer(player: Player) = clanMemberCache.get(player.uniqueId)?.clanId?.let { getClanByName(MessageService.raw(it)) }
 
     fun getClanByName(name: String) = clanCache.clans.firstOrNull { MessageService.raw(it.name).equals(name, true) }
+
+    private fun randomHexColor(): String {
+        val color = Random.nextInt(0x1000000)
+        return String.format("#%06X", color)
+    }
 }

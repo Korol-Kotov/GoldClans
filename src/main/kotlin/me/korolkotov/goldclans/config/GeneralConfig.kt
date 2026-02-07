@@ -40,5 +40,5 @@ class ClanLevelsConfig(section: ConfigurationSection) {
 class ClanStorageConfig(section: ConfigurationSection) {
     val startSlots = section.getInt("start-slots")
     val cost = section.getString("cost")!!.toRange()
-    val maxSlots = section.getInt("max-slots")
+    val slotsPerUpgrade = section.getInt("slots-per-upgrade")
 }

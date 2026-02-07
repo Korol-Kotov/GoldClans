@@ -17,4 +17,4 @@ clan:
   storage:
     start-slots: 9
     cost: 25000..50000
-    max-slots: 90
+    slots-per-upgrade: 9

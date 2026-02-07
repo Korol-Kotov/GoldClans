@@ -6,6 +6,8 @@ import org.bukkit.OfflinePlayer
 class VaultEconomy(
     private val economy: net.milkbowl.vault.economy.Economy
 ) : Economy {
+    override fun balance(player: OfflinePlayer): Double = economy.getBalance(player)
+
     override fun has(player: OfflinePlayer, amount: Double): Boolean =
         economy.has(player, amount)
 

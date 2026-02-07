@@ -7,5 +7,9 @@ author: KoroLKotov
 softdepend: [Vault]
 
 commands:
-  clan:
+  goldclan:
+    aliases: [clan, gc]
     description: 'Основная команда плагина GoldClans.'
+  clanchat:
+    aliases: [cc]
+    description: 'Команда кланового чата плагина GoldClans.'

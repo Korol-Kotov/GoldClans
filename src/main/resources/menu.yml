@@ -1,0 +1,77 @@
+clan-menu:
+  title: 'Клан %name%'
+  size: 27
+
+  items:
+    filler:
+      enabled: true
+      material: "BLACK_STAINED_GLASS_PANE"
+      display-name: " "
+    upgrade:
+      slots: [11]
+      material: "NETHERITE_INGOT"
+      display-name: "&e&lУлучшить клан"
+      lore:
+        - "&7Нажмите ЛКМ, чтобы внести ресурсы"
+        - "&7Нажмите ПКМ, чтобы внести сумму"
+        - ""
+        - "&7Текущий уровень: &e%level%"
+        - "&7Цена улучшения: &e%cost%"
+        - "&7Необходимые ресурсы:"
+        - "&e%type% &7- &e%amount%"
+    info:
+      slots: [13]
+      material: "RECOVERY_COMPASS"
+      display-name: "&e&lКлан %name%"
+      lore:
+        - "Лидер: %leader%"
+        - "Уровень: %level%"
+        - "Слотов в хранилище: %slots%"
+        - "Количество участников: %members%"
+    storage:
+      slots: [15]
+      material: "CHEST"
+      display-name: "&e&lХранилище"
+      lore:
+        - '&7Нажмите, чтобы перейти в хранилище клана'
+    close:
+      slots: [26]
+      material: "BARRIER"
+      display-name: "&c&lЗакрыть"
+
+storage-menu:
+  title: "Хранилище клана %name%"
+  size: 54
+
+  items:
+    slot-filler:
+      material: "GRAY_STAINED_GLASS_PANE"
+      display-name: " "
+    filler:
+      material: "BLACK_STAINED_GLASS_PANE"
+      display-name: " "
+    slot:
+      slots: "0..44"
+      lore:
+        - ""
+        - "&7Нажмите ЛКМ, чтобы забрать всё"
+        - "&7Нажмите ПКМ, чтобы забрать половину"
+    upgrade:
+      slots: [45]
+      material: "NETHERITE_INGOT"
+      display-name: "&e&lУвеличить слоты"
+      lore:
+        - "&7Текущее количество слотов: &e%slots%"
+        - "&7Нажмите, чтобы купить новый слот"
+    previous-page:
+      slots: [51]
+      material: "ARROW"
+      display-name: "&aПредыдущая страница"
+    next-page:
+      slots: [52]
+      material: "ARROW"
+      display-name: "&aСледующая страница"
+    back:
+      slots: [53]
+      material: "BARRIER"
+      display-name: "&c&lНазад"

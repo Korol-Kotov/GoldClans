@@ -53,5 +53,11 @@ class ItemConfig(
         return emptyList()
     }
 
+    fun getDisplayName(): String? {
+        if (!section.contains("display-name")) return null
+        if (section.isString("display-name")) return section.getString("display-name")
+        return null
+    }
+
     fun getMenu() = section.getString("menu")
 }
