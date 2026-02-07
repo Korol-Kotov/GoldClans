@@ -7,6 +7,7 @@ import me.korolkotov.goldclans.database.DatabaseManager
 import me.korolkotov.goldclans.economy.EconomyManager
 import me.korolkotov.goldclans.logger.LoggerManager
 import me.korolkotov.goldclans.menu.MenuManager
+import me.korolkotov.goldclans.placeholder.PlaceholderManager
 
 class LoadManager {
     companion object {
@@ -23,6 +24,7 @@ class LoadManager {
         loadManagerInterfaces.add(DatabaseManager())
         loadManagerInterfaces.add(EconomyManager())
         loadManagerInterfaces.add(ClanManager())
+        loadManagerInterfaces.add(PlaceholderManager())
         loadManagerInterfaces.add(MenuManager())
         loadManagerInterfaces.add(CommandManager())
     }
