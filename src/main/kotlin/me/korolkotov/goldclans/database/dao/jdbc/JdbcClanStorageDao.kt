@@ -26,12 +26,12 @@ class JdbcClanStorageDao(
         }
     }
 
-    override fun find(clanId: Int, slot: Int): ClanSlot? =
+    override fun find(clanId: String, slot: Int): ClanSlot? =
         ds.connection.use { con ->
             con.prepareStatement(
                 "SELECT * FROM clan_storage WHERE clan_id = ? AND slot = ?"
             ).use { ps ->
-                ps.setInt(1, clanId)
+                ps.setString(1, clanId)
                 ps.setInt(2, slot)
                 ps.executeQuery().use { rs ->
                     if (rs.next()) rs.toSlot() else null
@@ -39,12 +39,12 @@ class JdbcClanStorageDao(
             }
         }
 
-    override fun findAll(clanId: Int): List<ClanSlot> =
+    override fun findAll(clanId: String): List<ClanSlot> =
         ds.connection.use { con ->
             con.prepareStatement(
                 "SELECT * FROM clan_storage WHERE clan_id = ? ORDER BY slot"
             ).use { ps ->
-                ps.setInt(1, clanId)
+                ps.setString(1, clanId)
                 ps.executeQuery().use { rs ->
                     buildList {
                         while (rs.next()) {
@@ -55,12 +55,12 @@ class JdbcClanStorageDao(
             }
         }
 
-    override fun clear(clanId: Int, slot: Int) {
+    override fun clear(clanId: String, slot: Int) {
         ds.connection.use { con ->
             con.prepareStatement(
                 "DELETE FROM clan_storage WHERE clan_id = ? AND slot = ?"
             ).use {
-                it.setInt(1, clanId)
+                it.setString(1, clanId)
                 it.setInt(2, slot)
                 it.executeUpdate()
             }

@@ -30,6 +30,8 @@ class ClanCommand : CommandExecutor() {
     @SubCommand(commands = ["help"], permissionNode = "help")
     fun help(sender: CommandSender) {
         sendHelpMessage(sender)
+        if (sender.hasPermission("goldclans.clanchat"))
+            MessageService.sendMessage(sender, ConfigManager.instance.messageConfig.helpConfig.getMessage("clanchat"))
     }
 
     @SubCommand(commands = ["create"], permissionNode = "create")
@@ -39,15 +41,20 @@ class ClanCommand : CommandExecutor() {
             return
         }
 
+        val raw = MessageService.raw(name)
+        val nameSymbols = ConfigManager.instance.config.clan.nameSymbols
+        if (raw.any { !nameSymbols.contains(it) }) {
+            MessageService.sendMessage(player, ConfigManager.instance.messageConfig.errorsConfig.wrongName)
+            return
+        }
+
         val lengthRange = ConfigManager.instance.config.clan.nameLength
-        if (name.length !in lengthRange) {
+        if (raw.length !in lengthRange) {
             MessageService.sendMessage(player, ConfigManager.instance.messageConfig.clanErrorsConfig.wrongClanName,
                 mapOf("%min%" to lengthRange.min().toString(), "%max%" to lengthRange.max().toString()))
             return
         }
 
-        val raw = MessageService.raw(name)
-        println("Name: $name, raw: $raw")
         if (clanManager.getClanByName(raw) != null) {
             MessageService.sendMessage(player, ConfigManager.instance.messageConfig.clanErrorsConfig.clanAlreadyExists)
             return
@@ -57,10 +64,12 @@ class ClanCommand : CommandExecutor() {
         if (!EconomyManager.instance.has(player, cost)) {
             MessageService.sendMessage(player, ConfigManager.instance.messageConfig.errorsConfig.notEnoughMoney,
                 mapOf("%amount%" to EconomyManager.instance.format(cost)))
+            return
         }
 
         EconomyManager.instance.withdraw(player, cost)
         val clan = clanManager.createClan(player, name)
+        println("name: $name, raw: $raw, clan.name: ${clan.name}, stylized: ${clan.stylizedName()}, stylized + format: ${MessageService.format(clan.stylizedName())}")
         MessageService.sendMessage(player, ConfigManager.instance.messageConfig.commandsConfig.create,
             mapOf("%name%" to clan.stylizedName()))
     }
@@ -234,7 +243,7 @@ class ClanCommand : CommandExecutor() {
                 return@callback
             }
 
-            member.clanId = clan.name
+            member.clanId = clan.rawName()
             member.role = ClanRole.MEMBER
             clan.add(member)
             PluginCoroutineScope.scope.launch { clanManager.repository.clanMemberDao.upsert(member) }

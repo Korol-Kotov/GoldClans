@@ -36,15 +36,28 @@ data class Clan(
         val map = normal.zip(fancy).toMap()
 
         return buildString {
+            var skipNext = false
+
             for (ch in name) {
+                if (skipNext) {
+                    append(ch)
+                    skipNext = false
+                    continue
+                }
+
+                if (ch == '§' || ch == '&') {
+                    append(ch)
+                    skipNext = true
+                    continue
+                }
+
                 val lower = ch.lowercaseChar()
-                append(
-                    if (lower in map) map[lower]!!
-                    else ch
-                )
+                append(map[lower] ?: ch)
             }
         }
     }
+
+    fun rawName(): String = MessageService.raw(name)
 
     fun has(member: ClanMember) = members.any { it.uniqueId == member.uniqueId }
     fun has(player: Player) = members.any { it.uniqueId == player.uniqueId }
@@ -65,6 +78,7 @@ data class Clan(
     }
 
     fun members() = members.toList()
+    fun slots() = slots.toList()
 
     fun addItem(item: ItemStack) {
         var need = item.amount
@@ -81,7 +95,7 @@ data class Clan(
         }
         while (firstEmpty() != -1) {
             val slot = firstEmpty()
-            val clanSlot = getSlot(slot) ?: ClanSlot(name, slot, ItemStack(Material.AIR))
+            val clanSlot = getSlot(slot) ?: ClanSlot(rawName(), slot, ItemStack(Material.AIR))
             if (!slots.contains(clanSlot)) slots.add(clanSlot)
             val slotItem = item.clone()
             val add = min(slotItem.maxStackSize, need)

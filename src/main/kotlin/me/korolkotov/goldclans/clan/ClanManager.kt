@@ -40,7 +40,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
 
         PluginCoroutineScope.scope.launch {
             repository.clanDao.findAll().forEach { clan ->
-                clanCache.put(clan.name, clan)
+                clanCache.put(clan.rawName(), clan)
             }
             withContext(BukkitDispatcher.MAIN) {
                 Logger.instance.debug("Clans have been loaded to the cache")
@@ -58,7 +58,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             }
 
             clanCache.clans.forEach { clan ->
-                repository.clanStorageDao.findAll(clan.id).forEach { slot ->
+                repository.clanStorageDao.findAll(clan.rawName()).forEach { slot ->
                     clan.addSlot(slot)
                 }
             }
@@ -66,8 +66,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
     }
 
     fun createClan(leader: Player, name: String): Clan {
-        val clanName = if (name == MessageService.raw(name)) "&${randomHexColor()}$name"
-        else name
+        val clanName = if (name == MessageService.raw(name)) "&${randomHexColor()}$name" else name
         val member = getClanMember(leader)
         val clan = Clan(
             0,
@@ -79,11 +78,12 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             ClanLevelInfo.getRandom(),
             TimeUtil.now()
         )
-        member.clanId = clan.name
+        member.clanId = clan.rawName()
         member.role = ClanRole.LEADER
+        PluginCoroutineScope.scope.launch { repository.clanMemberDao.upsert(member) }
         clan.add(member)
-        clanCache.put(clan.name, clan)
-        Logger.instance.debug("Created a clan. (name: ${clan.name}, leader: ${member.uniqueId})")
+        clanCache.put(clan.rawName(), clan)
+        Logger.instance.debug("Created a clan. (name: ${clan.name} (${clan.rawName()}), leader: ${member.uniqueId})")
         PluginCoroutineScope.scope.launch {
             val id = repository.clanDao.create(clan)
             clan.id = id
@@ -96,8 +96,12 @@ class ClanManager : LoadManagerInterface<ClanManager> {
         clan.members().forEach { member ->
             member.clanId = null
             member.role = null
+            PluginCoroutineScope.scope.launch { repository.clanMemberDao.upsert(member) }
         }
-        clanCache.remove(clan.name)
+        clan.slots().forEach { slot ->
+            PluginCoroutineScope.scope.launch { repository.clanStorageDao.clear(clan.rawName(), slot.slot) }
+        }
+        clanCache.remove(clan.rawName())
         PluginCoroutineScope.scope.launch { repository.clanDao.delete(clan.id) }
     }
 
@@ -126,7 +130,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
 
     fun getClanByPlayer(player: Player) = clanMemberCache.get(player.uniqueId)?.clanId?.let { getClanByName(MessageService.raw(it)) }
 
-    fun getClanByName(name: String) = clanCache.clans.firstOrNull { MessageService.raw(it.name).equals(name, true) }
+    fun getClanByName(name: String) = clanCache.clans.firstOrNull { it.rawName().equals(name, true) }
 
     fun getClanInTop(place: Int) = clanCache.clans.sortedByDescending { it.level }.getOrNull(place)
 

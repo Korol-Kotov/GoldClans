@@ -27,6 +27,7 @@ class EconomySymbolsConfig(section: ConfigurationSection) {
 class ClanConfig(section: ConfigurationSection) {
     val createCost = section.getInt("create-cost")
     val nameLength = section.getString("name-length")!!.toRange()
+    val nameSymbols = section.getString("name-symbols")!!
 
     val levels = ClanLevelsConfig(section.getConfigurationSection("levels")!!)
     val storage = ClanStorageConfig(section.getConfigurationSection("storage")!!)

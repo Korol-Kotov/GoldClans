@@ -2,8 +2,6 @@
 -- Migration: Clans system tables (SQLite)
 -- ===============================
 
-PRAGMA foreign_keys = ON;
-
 -- -------------------------------
 -- clans — таблица кланов
 -- -------------------------------
@@ -40,11 +38,7 @@ CREATE TABLE clan_members
     player_name TEXT     NOT NULL,
     clan_id     TEXT NULL,
     role        INTEGER NULL, -- 0 - member, 1 - moderator, 2 - leader
-    joined_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (clan_id)
-        REFERENCES clans (name)
-        ON DELETE SET NULL
+    joined_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_clan_members_clan
@@ -62,11 +56,7 @@ CREATE TABLE clan_storage
     slot      INTEGER NOT NULL,
     item_data TEXT    NOT NULL,
 
-    PRIMARY KEY (clan_id, slot),
-
-    FOREIGN KEY (clan_id)
-        REFERENCES clans (name)
-        ON DELETE CASCADE
+    PRIMARY KEY (clan_id, slot)
 );
 
 CREATE INDEX idx_clan_storage_clan

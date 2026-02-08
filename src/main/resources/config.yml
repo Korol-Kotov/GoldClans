@@ -9,6 +9,7 @@ economy:
 clan:
   create-cost: 10000
   name-length: 3..3
+  name-symbols: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   levels:
     cost: 10000..50000
     resources:

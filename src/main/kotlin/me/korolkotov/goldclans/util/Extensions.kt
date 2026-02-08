@@ -9,7 +9,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 
-fun String.asComponent(): Component = LegacyComponentSerializer.legacyAmpersand().deserialize(this)
+fun String.asComponent(): Component = LegacyComponentSerializer.legacySection().deserialize(this)
 
 fun ResultSet.getInstant(column: String): Instant = getTimestamp(column).toInstant()
 

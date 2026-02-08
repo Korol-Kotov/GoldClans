@@ -36,11 +36,6 @@ CREATE TABLE clan_members
     role        TINYINT NULL COMMENT '0 - member, 1 - moderator, 2 - leader',
     joined_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_clan_members_clan
-        FOREIGN KEY (clan_id)
-            REFERENCES clans (name)
-            ON DELETE SET NULL,
-
     INDEX       idx_clan_members_clan (clan_id),
     INDEX       idx_clan_members_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -53,11 +48,6 @@ CREATE TABLE clan_storage
     clan_id   TEXT NOT NULL,
     slot      INT  NOT NULL,
     item_data TEXT NOT NULL,
-
-    CONSTRAINT fk_clan_storage_clan
-        FOREIGN KEY (clan_id)
-            REFERENCES clans (name)
-            ON DELETE CASCADE,
 
     PRIMARY KEY (clan_id, slot),
     INDEX     idx_clan_storage_clan (clan_id)

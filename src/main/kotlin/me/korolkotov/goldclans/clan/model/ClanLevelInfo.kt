@@ -39,9 +39,10 @@ data class ClanLevelInfo(
             val slotCost = args[1].toDouble()
             val resources = mutableMapOf<Material, Int>()
             for (i in 2..<args.size) {
+                if (args[i].trim().isEmpty()) continue
                 val info = args[i].split(':')
-                val type = Material.entries.first { it.name.equals(info[0], true) }
-                val amount = info[1].toInt()
+                val type = Material.entries.firstOrNull { it.name.equals(info.getOrNull(0), true) } ?: continue
+                val amount = info.getOrNull(1)?.toIntOrNull() ?: continue
                 resources[type] = amount
             }
             return ClanLevelInfo(levelCost, slotCost, resources)

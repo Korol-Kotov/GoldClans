@@ -34,12 +34,12 @@ class ItemBuilder(
 
     fun name(value: String?) = apply {
         if (value != null)
-            meta?.displayName(value.asComponent())
+            meta?.displayName(MessageService.format(value).asComponent())
     }
 
     fun lore(value: List<String>?) = apply {
         if (!value.isNullOrEmpty())
-            meta?.lore(value.map { it.asComponent() })
+            meta?.lore(value.map { MessageService.format(it).asComponent() })
     }
 
     fun customModelData(value: Int?) = apply {

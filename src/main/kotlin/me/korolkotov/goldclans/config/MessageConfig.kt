@@ -28,6 +28,7 @@ class ErrorsConfig(section: ConfigurationSection) {
     val notEnoughMoney = section.getString("not-enough-money")!!
     val playerNotFound = section.getString("player-not-found")!!
     val wrongAmount = section.getString("wrong-amount")!!
+    val wrongName = section.getString("wrong-name")!!
     val cleanInventory = section.getString("clean-inventory")!!
 }
 

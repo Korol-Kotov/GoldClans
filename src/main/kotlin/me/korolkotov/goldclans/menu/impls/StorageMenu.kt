@@ -60,7 +60,7 @@ class StorageMenu(
             }
             if (item.amount == entry.item.amount) {
                 clan.removeSlot(entry.slot)
-                PluginCoroutineScope.scope.launch { clanManager.repository.clanStorageDao.clear(clan.id, entry.slot) }
+                PluginCoroutineScope.scope.launch { clanManager.repository.clanStorageDao.clear(clan.rawName(), entry.slot) }
             } else entry.item.amount -= item.amount
             data.player.inventory.addItem(item)
             update()
@@ -80,6 +80,7 @@ class StorageMenu(
                 return@SimpleButton
             }
 
+            EconomyManager.instance.withdraw(data.player, clan.nextLevelInfo.slotCost)
             clan.storageSlots += ConfigManager.instance.config.clan.storage.slotsPerUpgrade
             clan.nextLevelInfo.slotCost = ClanLevelInfo.getRandom().slotCost
             PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
@@ -129,19 +130,26 @@ class StorageMenu(
         if (item.type.isEmpty) return
 
         item.amount = if (event.click.isLeftClick) item.amount else item.amount / 2
+        if (item.amount <= 0 || item.type.isEmpty) return
 
         if (!clan.canAdd(item)) return
 
-        event.whoClicked.inventory.removeItem(item)
+        if (item.amount >= event.currentItem!!.amount) {
+            event.whoClicked.inventory.setItem(event.slot, ItemStack(Material.AIR))
+        } else {
+            val newItem = item.clone()
+            newItem.amount = event.currentItem!!.amount - item.amount
+            event.whoClicked.inventory.setItem(event.slot, newItem)
+        }
         clan.addItem(item.clone())
+        update()
     }
 
     private fun Player.canGive(itemStack: ItemStack): Boolean {
-        if (this.inventory.firstEmpty() == -1) return true
         var need = itemStack.amount
-        for (item in this.inventory) {
-            if (item == null || item.type.isEmpty) continue
-            if (item.isSimilar(itemStack)) need -= (item.maxStackSize - item.amount)
+        for (item in inventory.contents) {
+            if (item == null) need -= itemStack.maxStackSize
+            else if (item.isSimilar(itemStack)) need -= (item.maxStackSize - item.amount)
             if (need <= 0) return true
         }
         return false

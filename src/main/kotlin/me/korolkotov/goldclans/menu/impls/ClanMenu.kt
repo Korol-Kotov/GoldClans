@@ -112,7 +112,7 @@ class ClanMenu(
 
     private fun checkNextLevel() {
         val info = clan.nextLevelInfo
-        if (info.levelCost > 0 || info.resources.isNotEmpty()) return
+        if (info.levelCost > 0 || info.resources.any { it.value > 0 }) return
         val newInfo = ClanLevelInfo.getRandom()
         clan.nextLevelInfo.levelCost = newInfo.levelCost
         clan.nextLevelInfo.resources.clear()
@@ -123,20 +123,27 @@ class ClanMenu(
 
     private fun tryTakeResources(player: Player) {
         val resources = clan.nextLevelInfo.resources
-        for (i in 0..<player.inventory.size) {
+        for (i in player.inventory.contents.indices) {
             if (resources.isEmpty()) break
+
             val item = player.inventory.getItem(i) ?: continue
-            if (!resources.containsKey(item.type)) continue
-            val need = resources[item.type] ?: 0
-            if (need <= 0) continue
+            val type = item.type
+            val need = resources[type] ?: continue
+            if (need <= 0) {
+                resources.remove(type)
+                continue
+            }
+
             val taken = min(item.amount, need)
-            if (taken <= 0) continue
-            if (taken >= item.amount) {
-                resources[item.type] = need - item.amount
+
+            item.amount -= taken
+            val left = need - taken
+
+            if (left <= 0) resources.remove(type)
+            else resources[type] = left
+
+            if (item.amount <= 0 && !item.type.isEmpty) {
                 player.inventory.setItem(i, ItemStack(Material.AIR))
-            } else {
-                resources.remove(item.type)
-                item.amount -= need
             }
         }
     }

@@ -22,7 +22,7 @@ class Placeholder : PlaceholderExpansion() {
         if (args[0].equals("tag", true)) {
             if (player == null) return null
             val clan = clanManager.getClanByPlayer(player) ?: return null
-            return MessageService.format(clan.stylizedName())
+            return " ${MessageService.format(clan.stylizedName())} "
         } else if (args[0].equals("level", true)) {
             if (player == null) return null
             val clan = clanManager.getClanByPlayer(player) ?: return null
@@ -31,7 +31,7 @@ class Placeholder : PlaceholderExpansion() {
             if (args.size < 3) return null
             val num = args[1].toIntOrNull() ?: return null
             val clan = clanManager.getClanInTop(num) ?: return null
-            return if (args[2].equals("tag", true)) clan.stylizedName()
+            return if (args[2].equals("tag", true)) " ${MessageService.format(clan.stylizedName())} "
             else if (args[2].equals("level", true)) clan.level.toString()
             else null
         }
