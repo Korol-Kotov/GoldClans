@@ -11,6 +11,7 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://jitpack.io")
     maven("https://repo.helpch.at/releases")
+    maven("https://mvn.lumine.io/repository/maven-public/")
 }
 
 dependencies {
@@ -27,6 +28,7 @@ dependencies {
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("io.lumine:Mythic-Dist:5.11.2")
 }
 
 val targetJavaVersion = 21

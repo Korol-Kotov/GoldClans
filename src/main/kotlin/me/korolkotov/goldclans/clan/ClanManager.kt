@@ -134,6 +134,8 @@ class ClanManager : LoadManagerInterface<ClanManager> {
 
     fun getClanInTop(place: Int) = clanCache.clans.sortedByDescending { it.level }.getOrNull(place)
 
+    fun getClanByMember(member: ClanMember) = clanCache.clans.firstOrNull { it.has(member) }
+
     private fun randomHexColor(): String {
         val color = Random.nextInt(0x1000000)
         return String.format("#%06X", color)
