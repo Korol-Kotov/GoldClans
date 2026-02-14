@@ -25,12 +25,12 @@ class Placeholder : PlaceholderExpansion() {
                 val uuid = UUID.fromString(args[1])
                 val member = clanManager.getClanMember(uuid) ?: return ""
                 val clan = clanManager.getClanByMember(member) ?: return ""
-                return " ${MessageService.format(clan.stylizedName())} "
+                return " ${MessageService.format(clan.stylizedName())}"
             }
 
             if (player == null) return ""
             val clan = clanManager.getClanByPlayer(player) ?: return ""
-            return " ${MessageService.format(clan.stylizedName())} "
+            return " ${MessageService.format(clan.stylizedName())}"
         } else if (args[0].equals("level", true)) {
             if (player == null) return ""
             val clan = clanManager.getClanByPlayer(player) ?: return ""
@@ -39,7 +39,7 @@ class Placeholder : PlaceholderExpansion() {
             if (args.size < 3) return null
             val num = args[1].toIntOrNull() ?: return null
             val clan = clanManager.getClanInTop(num) ?: return ""
-            return if (args[2].equals("tag", true)) " ${MessageService.format(clan.stylizedName())} "
+            return if (args[2].equals("tag", true)) " ${MessageService.format(clan.stylizedName())}"
             else if (args[2].equals("level", true)) clan.level.toString()
             else ""
         }

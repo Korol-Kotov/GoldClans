@@ -21,9 +21,10 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
+import kotlin.math.min
 
 class StorageMenu(
-    private val clan: Clan,
+    val clan: Clan,
     private val page: Int
 ) : Menu("storage-menu") {
     val clanManager get() = LoadManager.getInstance(ClanManager::class.java)
@@ -60,7 +61,7 @@ class StorageMenu(
             }
             if (item.amount == entry.item.amount) {
                 clan.removeSlot(entry.slot)
-                PluginCoroutineScope.scope.launch { clanManager.repository.clanStorageDao.clear(clan.rawName(), entry.slot) }
+                PluginCoroutineScope.scope.launch { clanManager.repository.clanStorageDao.clear(clan.id, entry.slot) }
             } else entry.item.amount -= item.amount
             data.player.inventory.addItem(item)
             update()
@@ -69,22 +70,35 @@ class StorageMenu(
         val upgrade = config.getItem("upgrade")
         addButton(SimpleButton(
             {
-                val lore = MessageService.format(upgrade.getLore(), mapOf("%slots%" to clan.storageSlots.toString()))
+                val lore = MessageService.format(upgrade.getLore(),
+                    mapOf("%slots%" to clan.storageSlots.toString(), "%cost%" to clan.nextLevelInfo.slotCost.toString())).toMutableList()
+                val prototype = lore.removeLast()
+                for ((material, amount) in clan.nextLevelInfo.slotsResources) {
+                    lore.add(MessageService.format(prototype,
+                        mapOf("%type%" to material.name, "%amount%" to amount.toString())))
+                }
                 ItemBuilder(upgrade.getItem()!!).lore(lore).build()
             },
             upgrade.getSlots()
         ) { data ->
-            if (!EconomyManager.instance.has(data.player, clan.nextLevelInfo.slotCost)) {
-                MessageService.sendMessage(data.player, ConfigManager.instance.messageConfig.errorsConfig.notEnoughMoney,
-                    mapOf("%amount%" to EconomyManager.instance.format(clan.nextLevelInfo.slotCost)))
-                return@SimpleButton
-            }
+            if (data.clickType.isLeftClick) {
+                tryTakeResources(data.player)
+                checkNextSlots()
+                update()
+            } else {
+                val balance = EconomyManager.instance.balance(data.player)
+                if (balance <= 0) {
+                    MessageService.sendMessage(data.player, ConfigManager.instance.messageConfig.errorsConfig.notEnoughMoney,
+                        mapOf("%amount%" to "до ${EconomyManager.instance.format(clan.nextLevelInfo.slotCost)}"))
+                    return@SimpleButton
+                }
 
-            EconomyManager.instance.withdraw(data.player, clan.nextLevelInfo.slotCost)
-            clan.storageSlots += ConfigManager.instance.config.clan.storage.slotsPerUpgrade
-            clan.nextLevelInfo.slotCost = ClanLevelInfo.getRandom().slotCost
-            PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
-            update()
+                val taken = min(balance, clan.nextLevelInfo.slotCost)
+                EconomyManager.instance.withdraw(data.player, taken)
+                clan.nextLevelInfo.slotCost -= taken.toInt()
+                checkNextSlots()
+                update()
+            }
         })
 
         val previousPage = config.getItem("previous-page")
@@ -153,5 +167,43 @@ class StorageMenu(
             if (need <= 0) return true
         }
         return false
+    }
+
+    private fun checkNextSlots() {
+        val info = clan.nextLevelInfo
+        if (info.slotCost > 0 || info.slotsResources.any { it.value > 0 }) return
+        val newInfo = ClanLevelInfo.getRandom()
+        clan.nextLevelInfo.slotCost = newInfo.slotCost
+        clan.nextLevelInfo.slotsResources.clear()
+        clan.nextLevelInfo.slotsResources.putAll(newInfo.slotsResources)
+        clan.storageSlots += ConfigManager.instance.config.clan.storage.slotsPerUpgrade
+        PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
+    }
+
+    private fun tryTakeResources(player: Player) {
+        val resources = clan.nextLevelInfo.slotsResources
+        for (i in player.inventory.contents.indices) {
+            if (resources.isEmpty()) break
+
+            val item = player.inventory.getItem(i) ?: continue
+            val type = item.type
+            val need = resources[type] ?: continue
+            if (need <= 0) {
+                resources.remove(type)
+                continue
+            }
+
+            val taken = min(item.amount, need)
+
+            item.amount -= taken
+            val left = need - taken
+
+            if (left <= 0) resources.remove(type)
+            else resources[type] = left
+
+            if (item.amount <= 0 && !item.type.isEmpty) {
+                player.inventory.setItem(i, ItemStack(Material.AIR))
+            }
+        }
     }
 }

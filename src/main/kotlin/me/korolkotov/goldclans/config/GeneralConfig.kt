@@ -35,11 +35,14 @@ class ClanConfig(section: ConfigurationSection) {
 
 class ClanLevelsConfig(section: ConfigurationSection) {
     val cost = section.getString("cost")!!.toRange()
+    val pickResources = section.getString("pick-resources")!!.toRange()
     val resources = section.getStringList("resources")
 }
 
 class ClanStorageConfig(section: ConfigurationSection) {
     val startSlots = section.getInt("start-slots")
     val cost = section.getString("cost")!!.toRange()
+    val pickResources = section.getString("pick-resources")!!.toRange()
+    val resources = section.getStringList("resources")
     val slotsPerUpgrade = section.getInt("slots-per-upgrade")
 }

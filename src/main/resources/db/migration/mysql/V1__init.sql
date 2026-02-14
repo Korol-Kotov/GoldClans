@@ -19,10 +19,7 @@ CREATE TABLE clans
     next_level_info TEXT        NOT NULL,
     created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE KEY uniq_clans_name (name),
-    INDEX           idx_clans_leader (leader_uuid),
-    INDEX           idx_clans_level (level),
-    INDEX           idx_clans_storage (storage_slots)
+    INDEX           idx_clans_leader (leader_uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- -------------------------------
@@ -32,12 +29,11 @@ CREATE TABLE clan_members
 (
     player_uuid VARCHAR(36) PRIMARY KEY,
     player_name VARCHAR(16) NOT NULL,
-    clan_id     TEXT NULL,
+    clan_id     INT NULL,
     role        TINYINT NULL COMMENT '0 - member, 1 - moderator, 2 - leader',
     joined_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    INDEX       idx_clan_members_clan (clan_id),
-    INDEX       idx_clan_members_role (role)
+    INDEX       idx_clan_members_clan (clan_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- -------------------------------
@@ -45,10 +41,11 @@ CREATE TABLE clan_members
 -- -------------------------------
 CREATE TABLE clan_storage
 (
-    clan_id   TEXT NOT NULL,
+    clan_id   INT  NOT NULL,
     slot      INT  NOT NULL,
     item_data TEXT NOT NULL,
 
     PRIMARY KEY (clan_id, slot),
-    INDEX     idx_clan_storage_clan (clan_id)
+    FOREIGN KEY (clan_id) REFERENCES clans (id)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

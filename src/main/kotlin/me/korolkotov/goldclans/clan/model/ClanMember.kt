@@ -7,7 +7,7 @@ import java.util.UUID
 data class ClanMember(
     val uniqueId: UUID,
     val name: String,
-    var clanId: String?,
+    var clanId: Int?,
     var role: ClanRole?,
     var joinedAt: Instant
 ) {

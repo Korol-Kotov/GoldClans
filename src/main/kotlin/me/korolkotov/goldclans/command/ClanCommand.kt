@@ -36,7 +36,7 @@ class ClanCommand : CommandExecutor() {
 
     @SubCommand(commands = ["create"], permissionNode = "create")
     fun create(player: Player, name: String) {
-        if (clanManager.getClanByPlayer(player) != null) {
+        if (clanManager.getClanByPlayer(player) != null || clanManager.getClanMember(player).role == ClanRole.LEADER) {
             MessageService.sendMessage(player, ConfigManager.instance.messageConfig.clanErrorsConfig.alreadyInClan)
             return
         }
@@ -69,7 +69,6 @@ class ClanCommand : CommandExecutor() {
 
         EconomyManager.instance.withdraw(player, cost)
         val clan = clanManager.createClan(player, name)
-        println("name: $name, raw: $raw, clan.name: ${clan.name}, stylized: ${clan.stylizedName()}, stylized + format: ${MessageService.format(clan.stylizedName())}")
         MessageService.sendMessage(player, ConfigManager.instance.messageConfig.commandsConfig.create,
             mapOf("%name%" to clan.stylizedName()))
     }
@@ -243,7 +242,7 @@ class ClanCommand : CommandExecutor() {
                 return@callback
             }
 
-            member.clanId = clan.rawName()
+            member.clanId = clan.id
             member.role = ClanRole.MEMBER
             clan.add(member)
             PluginCoroutineScope.scope.launch { clanManager.repository.clanMemberDao.upsert(member) }
@@ -436,8 +435,8 @@ class ClanCommand : CommandExecutor() {
                     clan.level = amount
                     val newInfo = ClanLevelInfo.getRandom()
                     clan.nextLevelInfo.levelCost = newInfo.levelCost
-                    clan.nextLevelInfo.resources.clear()
-                    clan.nextLevelInfo.resources.putAll(newInfo.resources)
+                    clan.nextLevelInfo.levelResources.clear()
+                    clan.nextLevelInfo.levelResources.putAll(newInfo.levelResources)
                     PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
                 }
                 MessageService.sendMessage(sender, ConfigManager.instance.messageConfig.commandsConfig.levelSet,
@@ -447,8 +446,8 @@ class ClanCommand : CommandExecutor() {
                 clan.level += amount
                 val newInfo = ClanLevelInfo.getRandom()
                 clan.nextLevelInfo.levelCost = newInfo.levelCost
-                clan.nextLevelInfo.resources.clear()
-                clan.nextLevelInfo.resources.putAll(newInfo.resources)
+                clan.nextLevelInfo.levelResources.clear()
+                clan.nextLevelInfo.levelResources.putAll(newInfo.levelResources)
                 PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
 
                 MessageService.sendMessage(sender, ConfigManager.instance.messageConfig.commandsConfig.levelAdd,
@@ -458,8 +457,8 @@ class ClanCommand : CommandExecutor() {
                 clan.level = max(1, clan.level - amount)
                 val newInfo = ClanLevelInfo.getRandom()
                 clan.nextLevelInfo.levelCost = newInfo.levelCost
-                clan.nextLevelInfo.resources.clear()
-                clan.nextLevelInfo.resources.putAll(newInfo.resources)
+                clan.nextLevelInfo.levelResources.clear()
+                clan.nextLevelInfo.levelResources.putAll(newInfo.levelResources)
                 PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
 
                 MessageService.sendMessage(sender, ConfigManager.instance.messageConfig.commandsConfig.levelRemove,

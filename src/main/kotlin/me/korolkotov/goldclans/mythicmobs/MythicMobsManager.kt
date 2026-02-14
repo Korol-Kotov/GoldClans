@@ -11,7 +11,8 @@ class MythicMobsManager : LoadManagerInterface<MythicMobsManager>, Listener {
     override fun getInstance(): MythicMobsManager = this
 
     override fun initialize() {
-        Bukkit.getPluginManager().registerEvents(this, Main.instance)
+        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs"))
+            Bukkit.getPluginManager().registerEvents(this, Main.instance)
     }
 
     @EventHandler

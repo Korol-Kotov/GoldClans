@@ -16,6 +16,8 @@ import me.korolkotov.goldclans.database.repository.ClanRepository
 import me.korolkotov.goldclans.load.LoadManager
 import me.korolkotov.goldclans.load.LoadManagerInterface
 import me.korolkotov.goldclans.logger.Logger
+import me.korolkotov.goldclans.menu.impls.ClanMenu
+import me.korolkotov.goldclans.menu.impls.StorageMenu
 import me.korolkotov.goldclans.util.MessageService
 import me.korolkotov.goldclans.util.TimeUtil
 import org.bukkit.Bukkit
@@ -40,7 +42,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
 
         PluginCoroutineScope.scope.launch {
             repository.clanDao.findAll().forEach { clan ->
-                clanCache.put(clan.rawName(), clan)
+                clanCache.put(clan.id, clan)
             }
             withContext(BukkitDispatcher.MAIN) {
                 Logger.instance.debug("Clans have been loaded to the cache")
@@ -58,7 +60,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             }
 
             clanCache.clans.forEach { clan ->
-                repository.clanStorageDao.findAll(clan.rawName()).forEach { slot ->
+                repository.clanStorageDao.findAll(clan.id).forEach { slot ->
                     clan.addSlot(slot)
                 }
             }
@@ -78,15 +80,17 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             ClanLevelInfo.getRandom(),
             TimeUtil.now()
         )
-        member.clanId = clan.rawName()
         member.role = ClanRole.LEADER
-        PluginCoroutineScope.scope.launch { repository.clanMemberDao.upsert(member) }
         clan.add(member)
-        clanCache.put(clan.rawName(), clan)
         Logger.instance.debug("Created a clan. (name: ${clan.name} (${clan.rawName()}), leader: ${member.uniqueId})")
         PluginCoroutineScope.scope.launch {
             val id = repository.clanDao.create(clan)
             clan.id = id
+
+            clanCache.put(clan.id, clan)
+
+            member.clanId = clan.id
+            repository.clanMemberDao.upsert(member)
         }
         return clan
     }
@@ -99,10 +103,15 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             PluginCoroutineScope.scope.launch { repository.clanMemberDao.upsert(member) }
         }
         clan.slots().forEach { slot ->
-            PluginCoroutineScope.scope.launch { repository.clanStorageDao.clear(clan.rawName(), slot.slot) }
+            PluginCoroutineScope.scope.launch { repository.clanStorageDao.clear(clan.id, slot.slot) }
         }
-        clanCache.remove(clan.rawName())
+        clanCache.remove(clan.id)
         PluginCoroutineScope.scope.launch { repository.clanDao.delete(clan.id) }
+        Bukkit.getOnlinePlayers().forEach { player ->
+            val holder = player.openInventory.topInventory.holder
+            if (holder is ClanMenu && holder.clan.id == clan.id) player.closeInventory()
+            else if (holder is StorageMenu && holder.clan.id == clan.id) player.closeInventory()
+        }
     }
 
     fun getClanMember(uniqueId: UUID) = clanMemberCache.get(uniqueId)
@@ -128,9 +137,11 @@ class ClanManager : LoadManagerInterface<ClanManager> {
         return member
     }
 
-    fun getClanByPlayer(player: Player) = clanMemberCache.get(player.uniqueId)?.clanId?.let { getClanByName(MessageService.raw(it)) }
+    fun getClanByPlayer(player: Player) = clanMemberCache.get(player.uniqueId)?.clanId?.let { getClanById(it) }
 
-    fun getClanByName(name: String) = clanCache.clans.firstOrNull { it.rawName().equals(name, true) }
+    fun getClanById(id: Int) = clanCache.get(id)
+
+    fun getClanByName(name: String) = clanCache.clans.firstOrNull { it.rawName().equals(MessageService.raw(name), true) }
 
     fun getClanInTop(place: Int) = clanCache.clans.sortedByDescending { it.level }.getOrNull(place)
 

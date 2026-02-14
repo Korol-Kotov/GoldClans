@@ -16,6 +16,9 @@ fun ResultSet.getInstant(column: String): Instant = getTimestamp(column).toInsta
 fun PreparedStatement.setInstant(index: Int, instant: Instant) = setTimestamp(index, Timestamp.from(instant))
 
 fun String.toRange(): IntRange {
+    val num = this.toIntOrNull()
+    if (num != null) return num..num
+
     val args = this.split("..")
     val min = args[0].toInt()
     val max = args[1].toInt()

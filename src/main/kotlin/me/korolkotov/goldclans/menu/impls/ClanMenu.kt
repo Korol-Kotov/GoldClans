@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack
 import kotlin.math.min
 
 class ClanMenu(
-    private val clan: Clan
+    val clan: Clan
 ) : Menu("clan-menu") {
     val clanManager get() = LoadManager.getInstance(ClanManager::class.java)
 
@@ -41,7 +41,7 @@ class ClanMenu(
                 val lore = MessageService.format(upgrade.getLore(),
                     mapOf("%level%" to clan.level.toString(), "%cost%" to clan.nextLevelInfo.levelCost.toString())).toMutableList()
                 val prototype = lore.removeLast()
-                for ((material, amount) in clan.nextLevelInfo.resources) {
+                for ((material, amount) in clan.nextLevelInfo.levelResources) {
                     lore.add(MessageService.format(prototype,
                         mapOf("%type%" to material.name, "%amount%" to amount.toString())))
                 }
@@ -112,17 +112,17 @@ class ClanMenu(
 
     private fun checkNextLevel() {
         val info = clan.nextLevelInfo
-        if (info.levelCost > 0 || info.resources.any { it.value > 0 }) return
+        if (info.levelCost > 0 || info.levelResources.any { it.value > 0 }) return
         val newInfo = ClanLevelInfo.getRandom()
         clan.nextLevelInfo.levelCost = newInfo.levelCost
-        clan.nextLevelInfo.resources.clear()
-        clan.nextLevelInfo.resources.putAll(newInfo.resources)
+        clan.nextLevelInfo.levelResources.clear()
+        clan.nextLevelInfo.levelResources.putAll(newInfo.levelResources)
         clan.level++
         PluginCoroutineScope.scope.launch { clanManager.repository.clanDao.update(clan) }
     }
 
     private fun tryTakeResources(player: Player) {
-        val resources = clan.nextLevelInfo.resources
+        val resources = clan.nextLevelInfo.levelResources
         for (i in player.inventory.contents.indices) {
             if (resources.isEmpty()) break
 

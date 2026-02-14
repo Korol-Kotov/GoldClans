@@ -12,10 +12,15 @@ clan:
   name-symbols: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   levels:
     cost: 10000..50000
+    pick-resources: 3..6
     resources:
-      - 'COBBLESTONE 64 0.5'
+      - 'COBBLESTONE 64..128 0.5'
       - 'STONE 256 0.5'
   storage:
     start-slots: 9
     cost: 25000..50000
+    pick-resources: 3..6
+    resources:
+      - 'COBBLESTONE 64..128 0.5'
+      - 'STONE 256 0.5'
     slots-per-upgrade: 9

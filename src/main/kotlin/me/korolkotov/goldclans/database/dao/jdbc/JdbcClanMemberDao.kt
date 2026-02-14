@@ -2,6 +2,7 @@ package me.korolkotov.goldclans.database.dao.jdbc
 
 import me.korolkotov.goldclans.clan.model.ClanMember
 import me.korolkotov.goldclans.clan.model.ClanRole
+import me.korolkotov.goldclans.config.ConfigManager
 import me.korolkotov.goldclans.database.dao.ClanMemberDao
 import me.korolkotov.goldclans.util.getInstant
 import me.korolkotov.goldclans.util.setInstant
@@ -14,7 +15,7 @@ class JdbcClanMemberDao(
 ) : ClanMemberDao {
     override fun upsert(member: ClanMember) {
         ds.connection.use { con ->
-            val sql = """
+            val sql = if (ConfigManager.instance.databaseConfig.type.equals("sqlite", true)) """
                 INSERT INTO clan_members
                 (player_uuid, player_name, clan_id, role, joined_at)
                 VALUES (?, ?, ?, ?, ?)
@@ -22,12 +23,20 @@ class JdbcClanMemberDao(
                     player_name = excluded.player_name,
                     clan_id = excluded.clan_id,
                     role = excluded.role
-            """
+            """ else """
+                INSERT INTO clan_members
+                (player_uuid, player_name, clan_id, role, joined_at)
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    player_name = VALUES(player_name),
+                    clan_id = VALUES(clan_id),
+                    role = VALUES(role);
+            """.trimIndent()
             con.prepareStatement(sql).use { ps ->
                 var i = 1
                 ps.setString(i++, member.uniqueId.toString())
                 ps.setString(i++, member.name)
-                ps.setString(i++, member.clanId)
+                ps.setInt(i++, member.clanId ?: -1)
                 ps.setInt(i, member.role?.id ?: -1)
                 ps.setInstant(++i, member.joinedAt)
                 ps.executeUpdate()
@@ -92,7 +101,7 @@ class JdbcClanMemberDao(
     private fun ResultSet.toMember() = ClanMember(
         uniqueId = UUID.fromString(getString("player_uuid")),
         name = getString("player_name"),
-        clanId = getString("clan_id"),
+        clanId = getInt("clan_id").let { if (it == -1) null else it },
         role = getInt("role").let { if (it == -1) null else ClanRole.entries.first { r -> r.id == it } },
         joinedAt = getInstant("joined_at")
     )

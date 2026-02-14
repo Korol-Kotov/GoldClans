@@ -95,7 +95,7 @@ data class Clan(
         }
         while (firstEmpty() != -1) {
             val slot = firstEmpty()
-            val clanSlot = getSlot(slot) ?: ClanSlot(rawName(), slot, ItemStack(Material.AIR))
+            val clanSlot = getSlot(slot) ?: ClanSlot(id, slot, ItemStack(Material.AIR))
             if (!slots.contains(clanSlot)) slots.add(clanSlot)
             val slotItem = item.clone()
             val add = min(slotItem.maxStackSize, need)
