@@ -51,7 +51,12 @@ class ClanManager : LoadManagerInterface<ClanManager> {
             repository.clanMemberDao.findAll().forEach { member ->
                 clanMemberCache.put(member.uniqueId, member)
                 if (member.clanId != null) {
-                    val clan = clanCache.get(member.clanId!!) ?: return@forEach
+                    val clan = clanCache.get(member.clanId!!)
+                    if (clan == null) {
+                        member.clanId = null
+                        member.role = null
+                        return@forEach
+                    }
                     clan.add(member)
                 }
             }

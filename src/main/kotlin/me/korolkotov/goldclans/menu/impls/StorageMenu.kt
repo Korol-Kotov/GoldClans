@@ -13,6 +13,7 @@ import me.korolkotov.goldclans.menu.button.SimpleButton
 import me.korolkotov.goldclans.util.ItemBuilder
 import me.korolkotov.goldclans.util.MessageService
 import me.korolkotov.goldclans.util.asComponent
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -45,7 +46,7 @@ class StorageMenu(
                 if (index >= clan.storageSlots) return@SimpleButton slotFiller.getItem()!!
                 val entry = clan.getSlot(index) ?: return@SimpleButton ItemStack(Material.AIR)
                 val lore = (entry.item.lore() ?: emptyList()).mapNotNull { LegacyComponentSerializer.legacySection().serialize(it) }
-                ItemBuilder(entry.item.clone()).lore(lore + slotItem.getLore()).build()
+                ItemBuilder(entry.item.clone()).setLore(lore + slotItem.getLore()).build()
             },
             slotItem.getSlots()
         ) { data ->
@@ -73,11 +74,12 @@ class StorageMenu(
                 val lore = MessageService.format(upgrade.getLore(),
                     mapOf("%slots%" to clan.storageSlots.toString(), "%cost%" to clan.nextLevelInfo.slotCost.toString())).toMutableList()
                 val prototype = lore.removeLast()
+                val loreComponents = lore.map { it.asComponent() }.toMutableList()
                 for ((material, amount) in clan.nextLevelInfo.slotsResources) {
-                    lore.add(MessageService.format(prototype,
-                        mapOf("%type%" to material.name, "%amount%" to amount.toString())))
+                    loreComponents.add(MessageService.formatComponent(prototype,
+                        mapOf("%type%" to Component.translatable(material.translationKey()), "%amount%" to amount.toString().asComponent())))
                 }
-                ItemBuilder(upgrade.getItem()!!).lore(lore).build()
+                ItemBuilder(upgrade.getItem()!!).lore(loreComponents).build()
             },
             upgrade.getSlots()
         ) { data ->

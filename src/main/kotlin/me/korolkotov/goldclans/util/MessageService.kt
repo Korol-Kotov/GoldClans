@@ -1,6 +1,7 @@
 package me.korolkotov.goldclans.util
 
 import me.korolkotov.goldclans.config.ConfigManager
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
@@ -10,6 +11,24 @@ import java.util.regex.Pattern
 
 object MessageService {
     private val prefix get() = ConfigManager.instance.messageConfig.prefix
+
+    fun formatComponent(
+        text: String,
+        replacements: Map<String, Component> = emptyMap()
+    ): Component {
+        val formatted = format(text)
+
+        var component: Component = LegacyComponentSerializer.legacySection().deserialize(formatted)
+
+        replacements.forEach { (key, value) ->
+            component = component.replaceText {
+                it.matchLiteral(key)
+                it.replacement(value)
+            }
+        }
+
+        return component
+    }
 
     fun format(text: String, replacements: Map<String, String> = emptyMap()): String {
         var result = text

@@ -31,7 +31,7 @@ data class ClanLevelInfo(
             for ((type, amount) in info.levelResources) {
                 string = string.append(type.name).append(':').append(amount.toString()).append(';')
             }
-            string = string.append('_')
+            string = string.append('!')
             string = string.append(info.slotCost.toString()).append(';')
             for ((type, amount) in info.slotsResources) {
                 string = string.append(type.name).append(':').append(amount.toString()).append(';')
@@ -40,7 +40,7 @@ data class ClanLevelInfo(
         }
 
         fun deserialize(string: String): ClanLevelInfo {
-            val args = string.split('_')
+            val args = string.split('!')
             val levelArgs = args[0].split(';')
             val levelCost = levelArgs[0].toDouble()
             val levelResources = mutableMapOf<Material, Int>()

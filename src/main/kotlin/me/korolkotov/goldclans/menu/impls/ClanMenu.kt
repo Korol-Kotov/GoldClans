@@ -15,6 +15,8 @@ import me.korolkotov.goldclans.menu.button.SimpleButton
 import me.korolkotov.goldclans.util.ItemBuilder
 import me.korolkotov.goldclans.util.MessageService
 import me.korolkotov.goldclans.util.asComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -41,11 +43,12 @@ class ClanMenu(
                 val lore = MessageService.format(upgrade.getLore(),
                     mapOf("%level%" to clan.level.toString(), "%cost%" to clan.nextLevelInfo.levelCost.toString())).toMutableList()
                 val prototype = lore.removeLast()
+                val loreComponents = lore.map { it.asComponent() }.toMutableList()
                 for ((material, amount) in clan.nextLevelInfo.levelResources) {
-                    lore.add(MessageService.format(prototype,
-                        mapOf("%type%" to material.name, "%amount%" to amount.toString())))
+                    loreComponents.add(MessageService.formatComponent(prototype,
+                        mapOf("%type%" to Component.translatable(material.translationKey()), "%amount%" to amount.toString().asComponent())))
                 }
-                ItemBuilder(upgrade.getItem()!!).lore(lore).build()
+                ItemBuilder(upgrade.getItem()!!).lore(loreComponents).build()
             },
             upgrade.getSlots()
         ) { data ->
@@ -82,7 +85,7 @@ class ClanMenu(
                         "%members%" to clan.members().size.toString()
                     )
                 )
-                ItemBuilder(info.getItem()!!).name(name).lore(lore).build()
+                ItemBuilder(info.getItem()!!).name(name).setLore(lore).build()
             },
             info.getSlots(),
             {}

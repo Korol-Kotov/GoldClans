@@ -1,6 +1,7 @@
 package me.korolkotov.goldclans.util
 
 import com.destroystokyo.paper.profile.ProfileProperty
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Color
@@ -39,10 +40,15 @@ class ItemBuilder(
                 .decoration(TextDecoration.ITALIC, false))
     }
 
-    fun lore(value: List<String>?) = apply {
+    fun setLore(value: List<String>?) = apply {
         if (!value.isNullOrEmpty())
             meta?.lore(value.map { MessageService.format(it).asComponent()
                 .decoration(TextDecoration.ITALIC, false) })
+    }
+
+    fun lore(value: List<Component>?) = apply {
+        if (!value.isNullOrEmpty())
+            meta?.lore(value.map { it.decoration(TextDecoration.ITALIC, false) })
     }
 
     fun customModelData(value: Int?) = apply {
@@ -140,7 +146,7 @@ class ItemBuilder(
             return ItemBuilder(ItemStack(material))
                 .amount(section.getInt("amount", 1))
                 .name(section.getString("display-name"))
-                .lore(section.getStringList("lore"))
+                .setLore(section.getStringList("lore"))
                 .customModelData(section.getInt("custom-model-data").takeIf { it >= 0 })
                 .unbreakable(section.getBoolean("unbreakable"))
                 .itemFlags(section.getStringList("item-flags"))
