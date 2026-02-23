@@ -77,7 +77,7 @@ class ClanManager : LoadManagerInterface<ClanManager> {
         val member = getClanMember(leader)
         val clan = Clan(
             0,
-            MessageService.format(clanName),
+            MessageService.format(clanName, decorations = false),
             member.uniqueId,
             null,
             1,

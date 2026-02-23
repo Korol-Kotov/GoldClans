@@ -2,6 +2,7 @@ package me.korolkotov.goldclans.util
 
 import me.korolkotov.goldclans.config.ConfigManager
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
@@ -30,7 +31,7 @@ object MessageService {
         return component
     }
 
-    fun format(text: String, replacements: Map<String, String> = emptyMap()): String {
+    fun format(text: String, replacements: Map<String, String> = emptyMap(), decorations: Boolean = true): String {
         var result = text
         replacements.forEach { (key, value) -> result = result.replace(key, value) }
 
@@ -46,7 +47,17 @@ object MessageService {
         }
         matcher.appendTail(buffer)
 
-        return ChatColor.translateAlternateColorCodes('&', buffer.toString())
+        var component = LegacyComponentSerializer.legacyAmpersand().deserialize(buffer.toString())
+        if (!decorations) component = component
+            .decorations(mapOf(
+                TextDecoration.ITALIC to TextDecoration.State.FALSE,
+                TextDecoration.BOLD to TextDecoration.State.FALSE,
+                TextDecoration.OBFUSCATED to TextDecoration.State.FALSE,
+                TextDecoration.STRIKETHROUGH to TextDecoration.State.FALSE,
+                TextDecoration.UNDERLINED to TextDecoration.State.FALSE
+            ))
+
+        return LegacyComponentSerializer.legacySection().serialize(component)
     }
 
     fun format(list: List<String>, replacements: Map<String, String> = emptyMap()): List<String> {
